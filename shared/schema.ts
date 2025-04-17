@@ -52,7 +52,8 @@ export type WsMessageType =
   | 'findNewPartner'
   | 'partnerInfo'
   | 'partnerDisconnected'
-  | 'systemMessage';
+  | 'systemMessage'
+  | 'webrtc-signal';
 
 export type WsMessage = {
   type: WsMessageType;
