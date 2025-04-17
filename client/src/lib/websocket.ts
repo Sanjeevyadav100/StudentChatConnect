@@ -7,6 +7,7 @@ class WebSocketService {
   private reconnectInterval: number = 2000; // 2 seconds
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionallyClosed: boolean = false;
+  private userId: string = `user_${Date.now()}${Math.random().toString(36).substring(2, 9)}`;
 
   connect() {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) return;
@@ -97,6 +98,10 @@ class WebSocketService {
   
   isConnected() {
     return this.socket && this.socket.readyState === WebSocket.OPEN;
+  }
+  
+  getUserId(): string {
+    return this.userId;
   }
 }
 
