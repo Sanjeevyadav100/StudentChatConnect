@@ -5,6 +5,7 @@ import MessageContainer from "./MessageContainer";
 import ChatInput from "./ChatInput";
 import ConnectionOverlay from "./ConnectionOverlay";
 import DisconnectionNotification from "./DisconnectionNotification";
+import VideoChat from "./VideoChat";
 import { useChatContext } from "@/contexts/ChatContext";
 
 const ChatApp = () => {
@@ -16,14 +17,18 @@ const ChatApp = () => {
   const {
     connectionStatus,
     messages,
-    sendMessage,
     userProfile,
     partnerInfo,
+    partnerId,
     isTyping,
+    isVideoEnabled,
+    isAudioEnabled,
     handleStartChat,
     handleSendMessage,
     handleTyping,
     findNewPartner,
+    handleVideoToggle,
+    handleAudioToggle
   } = useChatContext();
 
   // Show onboarding modal if user profile is not set
@@ -80,6 +85,14 @@ const ChatApp = () => {
           onToggleDarkMode={toggleDarkMode}
           darkMode={darkMode}
         />
+
+        {/* Video Chat */}
+        <VideoChat 
+          connectionStatus={connectionStatus}
+          partnerId={partnerId}
+          onVideoToggle={handleVideoToggle}
+          onAudioToggle={handleAudioToggle}
+        />
         
         <MessageContainer 
           messages={messages} 
@@ -87,7 +100,7 @@ const ChatApp = () => {
         />
         
         <ChatInput 
-          onSendMessage={handleSendMessage} 
+          onSendMessage={handleSendMessage}
           onTyping={handleTyping} 
           disabled={connectionStatus !== 'connected'}
         />
