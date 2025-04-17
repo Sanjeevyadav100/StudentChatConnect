@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Peer from 'simple-peer';
 import { webSocketService } from '@/lib/websocket';
-import { WsMessage } from '@shared/schema';
+import { WsMessage, WsMessageType } from '@shared/schema';
 
 interface WebRTCState {
   localStream: MediaStream | null;

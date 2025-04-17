@@ -75,9 +75,41 @@ export class ChatManager {
         this.handleLeave(userId);
         break;
         
+      case "webrtc-signal":
+        this.handleWebRTCSignal(userId, data);
+        break;
+        
       default:
         console.warn(`Unhandled message type: ${type}`);
     }
+  }
+  
+  // Handle WebRTC signaling
+  private handleWebRTCSignal(userId: string, data: any): void {
+    if (!data || !data.peerId || !data.signal) {
+      console.warn("Invalid WebRTC signal data");
+      return;
+    }
+    
+    // Get user's current room
+    const roomId = storage.getUserRoom(userId);
+    if (!roomId) return;
+    
+    const room = storage.getChatRooms().get(roomId);
+    if (!room) return;
+    
+    // Find the other user in the room (the peer)
+    const otherUserId = room.users.find(id => id !== userId);
+    if (!otherUserId) return;
+    
+    // Forward the WebRTC signal to the peer
+    this.sendMessage(otherUserId, {
+      type: "webrtc-signal",
+      data: {
+        signal: data.signal,
+        peerId: userId
+      }
+    });
   }
   
   // Handle a user joining the chat
@@ -221,7 +253,8 @@ export class ChatManager {
         type: "partnerInfo",
         data: {
           nickname: otherUser.nickname,
-          department: otherUser.department
+          department: otherUser.department,
+          peerId: otherUserId
         }
       });
       
@@ -229,7 +262,8 @@ export class ChatManager {
         type: "partnerInfo",
         data: {
           nickname: user.nickname,
-          department: user.department
+          department: user.department,
+          peerId: userId
         }
       });
     }

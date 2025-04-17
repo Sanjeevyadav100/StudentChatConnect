@@ -16,10 +16,15 @@ interface ChatContextProps {
   messages: Message[];
   isTyping: boolean;
   partnerInfo: string;
+  partnerId: string | null;
+  isVideoEnabled: boolean;
+  isAudioEnabled: boolean;
   handleStartChat: (profile: UserProfile) => void;
   handleSendMessage: (content: string) => void;
   handleTyping: (isTyping: boolean) => void;
   findNewPartner: () => void;
+  handleVideoToggle: (enabled: boolean) => void;
+  handleAudioToggle: (enabled: boolean) => void;
 }
 
 const defaultContextValue: ChatContextProps = {
@@ -28,10 +33,15 @@ const defaultContextValue: ChatContextProps = {
   messages: [],
   isTyping: false,
   partnerInfo: "Waiting for partner...",
+  partnerId: null,
+  isVideoEnabled: true,
+  isAudioEnabled: true,
   handleStartChat: () => {},
   handleSendMessage: () => {},
   handleTyping: () => {},
-  findNewPartner: () => {}
+  findNewPartner: () => {},
+  handleVideoToggle: () => {},
+  handleAudioToggle: () => {}
 };
 
 const ChatContext = createContext<ChatContextProps>(defaultContextValue);
@@ -48,6 +58,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState("Waiting for partner...");
+  const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const { toast } = useToast();
 
   // Connect to WebSocket when component mounts
@@ -101,7 +114,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
         if (message.data) {
           const nickname = message.data.nickname || "Anonymous";
           const department = formatDepartment(message.data.department);
+          const peerId = message.data.peerId;
+          
           setPartnerInfo(`Chatting with: ${nickname} (${department})`);
+          setPartnerId(peerId);
           setConnectionStatus("connected");
           
           // Add system message
@@ -220,6 +236,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     
     setConnectionStatus("waiting");
     setPartnerInfo("Waiting for partner...");
+    setPartnerId(null);
     setMessages([]);
     setIsTyping(false);
     
@@ -230,6 +247,16 @@ export function ChatProvider({ children }: ChatProviderProps) {
     
     webSocketService.sendMessage(message);
   }, [connectionStatus]);
+  
+  // Handle video toggle
+  const handleVideoToggle = useCallback((enabled: boolean) => {
+    setIsVideoEnabled(enabled);
+  }, []);
+  
+  // Handle audio toggle
+  const handleAudioToggle = useCallback((enabled: boolean) => {
+    setIsAudioEnabled(enabled);
+  }, []);
 
   const contextValue: ChatContextProps = {
     userProfile,
@@ -237,10 +264,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
     messages,
     isTyping,
     partnerInfo,
+    partnerId,
+    isVideoEnabled,
+    isAudioEnabled,
     handleStartChat,
     handleSendMessage,
     handleTyping,
-    findNewPartner
+    findNewPartner,
+    handleVideoToggle,
+    handleAudioToggle
   };
 
   return (
